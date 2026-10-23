@@ -25,13 +25,28 @@ app.post("/criarusuario", async(req, res) => {
 })
 
 app.post("/login", async(req, res) => {
-    const { email, senha } = req.body
-    const logar = await prisma.user.findUnique({
-        where: {
-            email
+    try {
+        const { email, senha } = req.body
+        const logar = await prisma.user.findUnique({
+            where: {
+                email
+            }
+        }) 
+        const senhaValida = await bcrypt.compare(senha, logar.senha)
+        if (!logar) {
+            res.status(401).json({
+                error: "Credenciais inválidas."
+            })
         }
-    }) 
-    const senhaValida = await bcrypt.compare(senha, user.senha)
+        if (!senhaValida) {
+            res.status(401).json({
+                error: "Credenciais inválidas."
+            })
+        }
+        res.status(200).json("Validado.")
+    } catch(error) {
+        res.status(500).json("Erro no servidor.")
+    }
 })
 
 app.get("/usuarios", async(req, res) => {
